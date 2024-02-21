@@ -1,0 +1,43 @@
+name: Trigger auto deployment for dimitar-container-app-helloworld
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - 'Dcokerfile/**'
+    - '.github/workflows/dimitar-container-app-helloworld-AutoDeployTrigger-e28f6bbd-bbec-4b5f-82aa-d0be8d10e1bf.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.DIMITARCONTAINERAPPHELLOWORLD_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}/Dcokerfile 
+          registryUrl: dimitarcontainerappsacr.azurecr.io
+          registryUsername: ${{ secrets.DIMITARCONTAINERAPPHELLOWORLD_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.DIMITARCONTAINERAPPHELLOWORLD_REGISTRY_PASSWORD }}
+          containerAppName: dimitar-container-app-helloworld
+          resourceGroup: dimitar-container-apps-rg
+          imageToBuild: dimitarcontainerappsacr.azurecr.io/dimitar-container-app-helloworld:${{ github.sha }}
+          
+            
+
+     
+
